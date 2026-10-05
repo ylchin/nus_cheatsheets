@@ -1,0 +1,603 @@
+\documentclass{article}
+\usepackage[a4paper, margin=3mm, landscape]{geometry}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{soul}
+\usepackage{graphicx}
+
+\pdfinfo{
+    /Title (CS4243 Midterm.pdf)
+    /Author (Chin Yi Ling)
+    /Subject (CS4243)
+    /Keywords (CS4243, nus, cheatsheet, pdf)
+}
+
+\graphicspath{ {./img/} }
+
+\pagestyle{empty}
+\setcounter{secnumdepth}{0}
+\setlength{\columnseprule}{0.25pt}
+
+% Redefine section commands to use less space
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{0mm}%
+    {-1ex plus -.5ex minus -.2ex}%
+    {0.5ex plus .2ex}%x
+{\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{0mm}%
+    {-1explus -.5ex minus -.2ex}%
+    {0.5ex plus .2ex}%
+{\normalfont\normalsize\bfseries}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{0mm}%
+    {-1ex plus -.5ex minus -.2ex}%
+    {1ex plus .2ex}%
+{\normalfont\small\bfseries}}%
+\makeatother
+
+% Adjust spacing for all itemize/enumerate
+\setlength{\leftmargini}{0.5cm}
+\setlength{\leftmarginii}{0.5cm}
+\setlist[itemize,1]{leftmargin=2mm,labelindent=1mm,labelsep=1mm}
+\setlist[itemize,2]{leftmargin=2mm,labelindent=1mm,labelsep=1mm,label=$\bullet$}
+\setlist[itemize,3]{leftmargin=2mm,labelindent=1mm,labelsep=1mm,label=$\bullet$}
+\setlist[enumerate,1]{leftmargin=2mm,labelindent=1mm,labelsep=1mm}
+\setlist[enumerate,2]{leftmargin=2mm,labelindent=1mm,labelsep=1mm,label=(\arabic*)}
+\setlist[itemize]{nolistsep}
+\setlist[enumerate]{nolistsep}
+
+% Adjust column separator width in matrix
+\setlength{\arraycolsep}{2.5pt}
+
+% Font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Define colors for math formulas
+\definecolor{myblue}{cmyk}{1,.72,0,.38}
+\everymath\expandafter{\the\everymath \color{myblue}}
+
+% Custom command for keywords
+\definecolor{highlight}{RGB}{251,243,218}
+\newcommand{\keyword}[2]{\sethlcolor{highlight}\hl{\textbf{#1}} - #2}
+\newcommand{\ilkeyword}[1]{\sethlcolor{highlight}\hl{\textbf{#1}}}
+
+% Define colors and style for code
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codered}{HTML}{CC241D}
+\definecolor{backcolor}{rgb}{0.95,0.95,0.95}
+\lstdefinestyle{codestyle}{
+    backgroundcolor = \color{backcolor},
+    commentstyle = \color{codegray},
+    keywordstyle = \color{codered},
+    stringstyle = \color{codegreen},
+    basicstyle = \ttfamily,
+    breakatwhitespace = false,
+    showstringspaces = false,
+    breaklines = true,
+    showtabs = false,
+    tabsize = 2
+}
+\lstset{style = codestyle}
+
+
+% -----------------------------------------------------------------------
+\begin{document}
+\begin{multicols*}{4}
+\footnotesize
+
+% Title box
+\begin{center}
+    \fbox{
+        \parbox{0.8\linewidth}{
+            \centering \textcolor{black}{
+                {\Large\textbf{CS4243}} \\
+                \normalsize{AY26/27 Sem 1}} \\
+                {\footnotesize \textcolor{gray}{github.com/ylchin}}
+        }
+    }
+\end{center}
+
+\section{01. Introduction}
+\begin{itemize}
+    \item $f(x,y) = i(x,y)r(x,y)$ where $f$ is intensity, $i$ is illumination, and $r$ is reflectance
+    \item \keyword{Exposure time}{Time for incident light to reach sensor}
+    \item \keyword{Storage}{$b = MNK$ where img. has size $M \times N$ and $K$-bit depth}
+    \item Color to greyscale: $I = W_R R + W_G G + W_B B$ where $\sum_{i \in [R,G,B]} W_i = 1$
+    \begin{itemize}
+        \item Common weights: $(.299,.587,.114)$
+    \end{itemize}
+    \item \keyword{Norm. RGB}{$(r,g,b) = (\frac{R}{R+G+B},\frac{G}{R+G+B},\frac{B}{R+G+B})$}
+    \item $(R,G,B) \leftrightarrow (r,g,b) \leftrightarrow (r,g,I)$ where $I = \frac{R+G+B}{3}$
+    \item \ilkeyword{HSV Color Space}
+    \begin{itemize}
+        \item Hue: Pure color (0 to 360)
+        \item Saturation: Mix pure color (1) with white light (0)
+        \item Value: Mix from black (0) to white (255)
+    \end{itemize}
+\end{itemize}
+
+\section{02. Filtering}
+\begin{itemize}
+    \item \keyword{Point processing}{$x_{ij} = f(p_{ij})$}
+    \begin{itemize}
+        \item \keyword{Brightness}{$x_{ij} = p_{ij} + b$ (Clipping behavior)}
+        \item \keyword{Intensity scaling}{$x_{ij} = a p_{ij}$ (Increased/decreased contrast)}
+        \item \keyword{Normalization (Whitening)}{$x_{ij} = \frac{p_{ij} - \mu}{\sigma}$ $\sigma^2 = \frac{\sum_{i = 0}^{I} \sum_{j = 0}^{J} (p_{ij} - \mu)^2}{IJ}$}
+        \item \keyword{Gamma}{$x_{ij} = 255 (\frac{p_{ij}}{255})^\gamma$} where $\gamma > 0$
+        \item \keyword{Intensity Histogram}{No data on location}
+        \begin{itemize}
+            \item \keyword{Stretching}{$x = (p - f_{\text{min}})(\frac{255}{f_{\text{max}} - f_{\text{min}}})$}
+            \item \keyword{Equalization}{Turn cumulative distribution linear}
+            \begin{enumerate}
+                \item Get histogram: $h_k = \sum_{i = 0}^{I} \sum_{j = 0}^{J} \delta$ where $\delta = 1$ if $p_{ij} - k = 0$ and $0$ otherwise
+                \item Estimate CDF: $c_k = \frac{\sum_{l = 1}^{k} h_l}{IJ}$
+                \item Map $p_{ij} = k$ to new bin $x_{ij}$: $x_{ij} = 255 \text{CDF}(k)$
+            \end{enumerate}
+            \begin{itemize}
+                \item Pros: More contrast than normalization, less prone to outliers than stretching
+                \item Cons: More expensive
+            \end{itemize}
+            \item Good for foreground and background separation: Bi-modal histogram can be thresholded
+        \end{itemize}
+    \end{itemize}
+    \item \keyword{Correlation Filtering}{Window (Moving average)}
+    \begin{itemize}
+        \item Motivation: Reduce noise
+        \begin{itemize}
+            \item Impulse noise: Random white occurrences of pixels
+            \item Salt and pepper noise: Rand. white and black pixels
+            \item Gaussian noise: Variations in intensity from Gaussian distribution $p_{ij} = \hat{p}_{ij} + \eta$ where $\eta \sim N(\mu_n, \sigma_n)$
+        \end{itemize}
+        \item $x_{ij} = \sum_{u=-k}^{k} \sum_{v=-k}^{k} f_{uv} \cdot p_{i+u,j+v}$ where $f$ is a \ilkeyword{kernel} of weights
+        \item Notation: $X = P \otimes F$
+        \item \keyword{Box Filter}{Blurs image}
+        \item Given kernel of width $2k+1$, add padding: $\lfloor \frac{2k+1}{2} \rfloor$
+        \begin{itemize}
+            \item Filling methods: Zero-padding, wrap around, copy edge, reflect
+        \end{itemize}
+        \item \keyword{Gaussian Filter}{Nearest neighboring pixels have more weight}
+        \begin{itemize}
+            \item $f_{uv} = \frac{1}{2 \pi \sigma^2} e^{-\frac{u^2 + v^2}{2\sigma^2}}$
+            \item Size of kernel: At some threshold, kernel will have lots of 0s, which is not useful
+            \item Variance: Determines smoothing effect
+        \end{itemize}
+    \end{itemize}
+    \item \keyword{Template Matching}{Set template as kernel and match occurs at local max.}
+    \begin{itemize}
+        \item \keyword{Normalized Cross-Correlation}{Normalizes using filter and input window}
+        \begin{itemize}
+            \item Motivation: Non-normalized is dominated by original image pixels
+        \end{itemize}
+        \item $x_{ij} = \frac{1}{|F||w_{ij}|} \sum_{u=-k}^{k} \sum_{v=-k}^{k} f_{uv} \cdot p_{i+u,j+v}$ where $|\cdot|$ is magnitude of kernel (i.e. Square root of sum of squares)
+    \end{itemize}
+    \item \keyword{Convolution Filtering}{Flip kernel in both directions, then do cross-correlation}
+    \begin{itemize}
+        \item $x_{ij} = \sum_{u=-k}^{k} \sum_{v=-k}^{k} f_{uv} \cdot p_{i-u,j-v}$
+        \item Notation: $X = F * P$
+        \item Convolution has nicer properties than correlation
+        \item Properties: Commutative, Associative, Distributive over addition, Scalar factor, Identity
+    \end{itemize}
+    \item \keyword{Non-Linear Filters}{Filters that perform non-linear operations (e.g. Median, Min., Max.)}
+    \begin{itemize}
+        \item Correlation and convolution are both linear operations
+        \item \ilkeyword{Median Filtering}
+        \begin{itemize}
+            \item Removes spikes: Good for removing impulse and salt and pepper noise
+            \item No new pixel values introduced
+            \item Edge preserving
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\section{03. Gradients}
+\begin{itemize}
+    \item \keyword{Gradient}{Vector at pixel pointing at most rapid change in intensity}
+    \begin{itemize}
+        \item $\nabla f= [\frac{\partial f}{\partial x},\frac{\partial f}{\partial y}]$
+        \item In images, der. is finite: $f'(x)=\frac{f(x+1)-f(x-1)}{2}$
+         \item \keyword{Gradient direction} orientation of edge normal: $\theta = \tan^{-1}(\frac{\partial f}{\partial x}/ \frac{\partial f}{\partial y})$
+        \item \keyword{Edge strength} gradient magnitude $||\nabla f||=\sqrt{(\frac{\partial f}{\partial x})^2+(\frac{\partial f}{\partial y})^2}$
+    \end{itemize}
+    \item \ilkeyword{Sobel Filter}
+    \begin{itemize}
+        \item Horizontal sobel filter ($S_x$): Detects vertical lines
+        \item Vertical sobel filter ($S_y$): Detects horizontal lines
+        
+        \includegraphics[scale=0.5]{img/sobel-filter.png}
+        \item Differentiation is sensitive to noise: Need to blur first
+        \begin{itemize}
+            \item Trade-off: Blur removes noise, but blurs the edge
+            \item \keyword{Derivative of Gaussian}{Blur + Derivative merged into 1 filter; $\frac{\partial}{\partial x} (h * f) = (\frac{\partial}{\partial x} h) * f$}
+        \end{itemize}
+    \end{itemize}
+    \item \keyword{Laplace Filter}{2nd Derivative Filter}
+    \begin{itemize}
+        \item $f''(x) = \lim_{h \rightarrow 0} \frac{f(x+h) -2f(x)+f(x-h)}{h^2}$
+        \item \keyword{Laplacian of Gaussian (LoG) Filter}{Combine Laplace filter with Gaussian}
+        \begin{itemize}
+            \item Produces zero-crossings at edge
+        \end{itemize}
+    \end{itemize}
+    \item \ilkeyword{Canny Edge Detector}
+    \begin{enumerate}
+        \item Filter image with derivative of Gaussian
+        \item Find magnitude and orientation of gradient
+        \item Thin wide ridges down to single pixel width via non-maximum suppression
+        \item Perform thresholding (hysteresis) and linking
+    \end{enumerate}
+    \item \keyword{Non-maximum Suppression}{For each pixel, check if it's local maximum along gradient direction. If yes, then keep. Else, 0.}
+    \item \keyword{Hysteresis thresholding}{Use a high threshold to start edge curves and low threshold to continue growing them}
+    \begin{itemize}
+        \item Motivation: Single high threshold can miss out some parts of the edge
+    \end{itemize}
+    \item \ilkeyword{Hough Transform}
+    \begin{itemize}
+        \item Goal: Which points belong to what line?
+        \item $y = mx+b$ $\quad$ $\frac{x}{a} + \frac{y}{b} = 1$
+        \item $x \cos \theta + y \sin \theta = \rho$
+        \item \keyword{Line fitting}{$E = \frac{1}{N} \sum_i (y_i - (mx_i + b))^2$}
+        \begin{itemize}
+            \item Goal: Find parameters $m$ and $b$ that min. $E$
+            \item Using gradient descent: $b = \bar{y} - m\bar{x}$ $\quad$ $m = \frac{\sum_i (x_i - \bar{x})(y_i - \bar{y})}{\sum_i (x_i - \bar{x})^2}$ where $\bar{y} = \frac{\sum_i y_i}{N}$ and $\bar{x} = \frac{\sum_i x_i}{N}$
+             \item Cons: Choice of error function, outliers
+        \end{itemize}
+        \item \keyword{Hough Transform}{Parameterize shape and vote}
+
+        \includegraphics[scale=0.76]{img/line.png}
+        \begin{enumerate}
+        \item Initialize accumulator array $A(\theta, \rho) = 0$
+        \item For each image edge point $(x_i, y_i)$:
+        \begin{enumerate}
+            \item For each $\theta$:
+            \begin{enumerate}
+                \item Solve for $\rho = x_i \cos \theta + y_i \sin \theta$
+                \item $A(\theta, \rho) = A(\theta, \rho) + 1$
+            \end{enumerate}
+        \end{enumerate}
+        \item Find maximum in $A(\theta, \rho)$
+        \item Detected lines are given by $\rho^* = x\cos\theta^* + y\sin\theta^*$
+    \end{enumerate}
+    \end{itemize}
+\end{itemize}
+
+
+\section{04. Filter Banks, Texture and Learned Filters}
+\begin{itemize}
+    \item \keyword{Filter bank} Collection of kernels detecting different local patterns (edges, bars,  spots) at different orientations and scales.
+    \begin{itemize}
+        \item Filter response $r_k(x,y)=(I*h_k)(x,y)$
+        \item K filters $\rightarrow$ K-dimensional feature vector at each pixel: $\bold{r}(x,y)=[r_1(x,y),\cdots,r_K(x,y)]^T$
+    \end{itemize}
+    \item \ilkeyword{Gabor Filters}
+    \begin{itemize}
+        \item Sinusoid × Gaussian envelope; detects oriented patterns at specific frequencies/scales.
+        \item \keyword{1D Gabor} $g(x)=e^{-\frac{x^2}{2\sigma^2}}\sin(2\pi fx)$
+        \item \keyword{2D Gabor} 
+        
+        $g(m,n)=
+\frac{1}{2\pi\sigma^2}
+\exp\left(
+-\frac{m'^2+\gamma^2n'^2}{2\sigma^2}
+\right)
+\sin\left(
+\frac{2\pi m'}{\lambda}+\phi \right)$ where $m'=m\cos\omega+n\sin\omega$ and $n'=-m\sin\omega+n\cos\omega$
+        \begin{itemize}
+            \item $\omega$: Orientation of sinusoid.
+            \item $\lambda$: Wavelength; $f=1/\lambda$.
+            \item $\phi$: Phase shift.
+            \item $\gamma$: Aspect ratio ($\gamma=1$: circular; otherwise elliptical).
+            \item $\sigma$: Gaussian envelope scale/decay.
+        \end{itemize}
+        \item Key points:
+        \begin{itemize}
+            \item Gaussian envelope selects local spatial region.
+            \item Sinusoid selects orientation and frequency.
+            \item Higher frequency $\rightarrow$ narrower stripes; lower frequency have broader, smoother responses to coarser patters; higher-frequency filters with smaller, more localized responses.
+            \item Larger $\sigma$ $\rightarrow$ larger spatial coverage.
+            \item Odd (sine) $\rightarrow$ edges; even (cosine) $\rightarrow$ bars/ridges.
+            \item Frequency controls pattern spacing; scale controls neighborhood size.
+            \item Usually $\lambda\propto\sigma$ to maintain a constant number of visible cycles.
+        \end{itemize}
+    \end{itemize}
+    \item \ilkeyword{Multi-scale reasoning}
+    \begin{itemize}
+        \item Why? Structures have different characteristic sizes and apparent sizes.
+        \item \keyword{Gaussian pyramid}{Progressively blurred + downsampled images}
+        \begin{itemize}
+            \item \keyword{Downsampling}{Removing rows and column of pixels at a fixed stride}
+            \item Gaussian smoothing suppresses fine details; prevents aliasing (false patterns introduced by downsampling) before downsampling
+            \item Same filter at higher pyramid levels covers larger regions of the original image
+        \end{itemize}
+
+        \item \ilkeyword{Scale selection}
+        \begin{itemize}
+            \item Measure responses across scales; choose local maximum where filter scale matches structure size
+            \item \keyword{LoG}{Second derivative of Gaussian; blob detector.}
+                $\nabla^2g=\frac{\partial^2g}{\partial x^2}+\frac{\partial^2g}{\partial y^2}$
+                \begin{itemize}
+                    \item Scale normalised response $R(x,y;\sigma)=\sigma^2|\nabla^2(G_\sigma*I)(x,y)|$
+                    \item $\sigma^2$: allows comparison across scales
+                    \item \keyword{Difference of Gaussians (DoG)}{Cheaper LoG approximation}
+                \end{itemize}
+        \end{itemize}
+        \item \keyword{Multi-scale representations}{Retain and concatenate responses from different scales instead of selecting only the maximum.} $\mathbf r =[r_1^{\sigma_1},\ldots,r_K^{\sigma_1},
+r_1^{\sigma_2},\ldots,r_K^{\sigma_2}]$
+    \end{itemize}
+
+    \item \keyword{Textures}{Regional patterns of repeating elements; useful for describing material properties}
+    \begin{itemize}
+        \item Pipeline: $\text{filter bank}\rightarrow\text{response maps}\rightarrow\text{regional pooling}\rightarrow
+        \text{texture vector}$
+        \item Pixel-wise response are too localised $\rightarrow$ pool responses over region $\Omega$.
+        \[t_k(\Omega)=\frac{1}{|\Omega|} \sum_{(x,y)\in\Omega}|r_k(x,y)|\]
+        \[\mathbf{t}(\Omega)=[t_1,\cdots,t_K]^T\]
+        \item Pooling summarises regional patterns, reducing sensitivity to exact positions
+        \item \keyword{Texture similarity}{$D(\Omega_a,\Omega_b)=||\mathbf{t}(\Omega_a)-\mathbf{t}(\Omega_n)||_2$}
+        \item Small distance indicates similar texture
+        \item Material Classification
+        \begin{itemize}
+            \item Nearest neighbour: Assign class of closest training texture vector 
+            \[i^*=\arg\min_i ||\mathbf{t}(\Omega)-\mathbf{t}(\Omega_i||_2\]
+            \item Nearest class mean: Assign class of closest representative class mean
+            \[\mu_c=\frac{1}{N_c}\sum_{i:y_i=c}\mathbf{t}(\Omega_i)\]
+            \[\hat{c}(\Omega)=\arg\min_i ||\mathbf{t}(\Omega)-\mu_c||\]
+        \end{itemize}
+    \end{itemize}
+
+    \item \ilkeyword{Learned filters}
+    \begin{itemize}
+        \item \keyword{Traditional CV} Filtering $\rightarrow$ Pooling $\rightarrow$ Classifier; kernels manually specified
+        \item \keyword{CNN}{Learns kernels from data to minimise prediction error; convolutional layer = learned filter bank.}
+        \begin{itemize}
+            \item Convolving a filter on a single input gives a single feature map
+            \item K filters gives K output channels
+            \item Multiple layers learn increasingly complex features
+        \end{itemize}
+        \item \keyword{ReLU}{$ReLU(r)=\max(0,r)$}
+        \begin{itemize}
+            \item Introduces nonlinearity. Without it, stacked linear convolutions collapse into one effective kernel.
+        \end{itemize}
+        \item \keyword{Max Pooling}{Retains maximum activation within a local window; reduces resolution and sensitivity to small distortions.}
+        \item \keyword{CNN Architecture}{$\text{Conv}\rightarrow\text{ReLU}\rightarrow\text{Max Pool}$}
+        \begin{itemize}
+            \item Repeated blocks $\rightarrow$ fully connected classifiers $\rightarrow$ class scores.
+            \item \keyword{Receptive field}{Original image region influencing an output activation. }
+        \end{itemize}
+        
+    \end{itemize}
+\end{itemize}
+
+
+\section{05. CNNs}
+\begin{itemize}
+    \item \ilkeyword{Image classification}
+    \begin{itemize}
+        \item Goal: Assign a discrete label from K classes to an entire image
+        \[\mathbf{x}\in\mathbb{R}^{H\times W \times C }\]
+        \[f_\theta (\mathbf{x})=\mathbf{z}\in\mathbb{R}^K,\hat{y}=\arg\max_kz_k\]
+        \item Accuracy: $\frac{1}{N}\sum^N_{i=1}\mathbf{1}[\hat{y}_i=y_i]$
+        \item \keyword{Classifier stages}{$\mathbf x \rightarrow^{\phi_{\theta_f}}\mathbf{h}\rightarrow^{g_{\theta_c}}\mathbf{z}\rightarrow^{\arg\max}\hat{y}$}
+        \begin{itemize}
+            \item $\phi_{\theta_f}$: Feature extractor; maps pixels to representation $\bold{h}$.
+            \item $g_{\theta_c}$: Classifier; maps features to K class scores.
+            \item Traditional CV: hand-designed feature extractor, learned classifier.
+            \item Deep learning: both learned jointly (end-to-end).
+        \end{itemize}
+        \item Data pipeline: labeled training data → train classifier → tune hyperparameters on validation set → evaluate on unseen test set.
+    \end{itemize}
+    \item \ilkeyword{Neural Networks \& MLPs}
+    \begin{itemize}
+        \item \keyword{Perceptron}{Weighted sum + bias + nonlinear activation $a=\sigma(\textbf{w}^T\textbf{x}+b)$}
+        \item \keyword{Multi-layer perceptron (MLP)}{Connected perceptrons across multiple layers.}
+        \[\textbf{a}^{(0)}=\textbf{u}, \textbf{a}^{(l)}=\sigma(W^{(l)}\textbf{a}^{(l-1)}+\textbf{b}^{(l)})\]
+        \item Output layer (classification head): $\textbf{z}=W^{(L)}\textbf{a}^{(L-1)}+\textbf{b}^{(L)}$
+        \item Fully connected layer parameter count: $\#\text{params}=n_{\text{in}}n_{\text{out}}+n_{\text{out}}$
+        \item MLP limitations for images:
+        \begin{itemize}
+            \item Requires flattening $H\times W\times C\rightarrow HWC$
+            \item Ignores explicit spatial neighborhood relationships.
+            \item Every hidden unit connects to every input pixel $\rightarrow$, resulting in a large parameter count
+        \end{itemize}
+        \item MLPs are commonly used as CNN classification heads
+    \end{itemize}
+    \item \ilkeyword{Convolutional Neural Networks}
+    \begin{itemize}
+        \item Why convolution?
+        \begin{itemize}
+            \item Local connectivity: Each neuron observes a local neighbourhood (receptive field)
+            \item Parameter sharing: Same kernel applied at different spatial locations
+            \item Translation equivariance: Translating input produces a corresponding translation in feature matps
+            \item Substantially fewer parameters than fully connected layers
+        \end{itemize}
+        \item \keyword{Strided convolution}{Downsamples feature map; reduces resolution and computation}
+        \item \keyword{Dilated convolution}{Enlarges receptive field without extra parameters or reducing spatial resolution}
+        \item Output dimension: $H_{\text{out}}=\lfloor\frac{H+2P-D(K-1)-1}{S}\rfloor+ 1$
+        \item For no dilation ($D=1$):  $H_{\text{out}}=\lfloor\frac{H+2P-K}{S}\rfloor+ 1$
+        \item $H$: input size; $P$: padding; $K$: kernel; $S$: stride; $D$: dilation
+        \item \ilkeyword{CNN Feature Progression}
+        \begin{itemize}
+            \item Typical architecture: $\text{Input}\rightarrow [\text{Conv}\rightarrow\text{Activation}\rightarrow\text{Pooling}]^n\rightarrow\text{Classification Head}$
+            \item As network depth increases: 
+            \begin{itemize}
+                \item Spatial resolution ↓
+                \item Number of channels ↑
+                \item Receptive field ↑
+                \item Features become increasingly complex and task-specific.
+            \end{itemize}
+            \item \keyword{Backbone}{Extracts reusable feature maps}
+            \item \keyword{Task-specific head}{Converts features into class logits, bounding boxes, segmentation masks}
+        \end{itemize}
+        \item \keyword{Classification Head}{Turns features into a prediction by selecting the class with the largest logit, or class score.}
+        \begin{itemize}
+            \item Logits: $\textbf{z}=W^{(L)}\textbf{a}^{(L-1)}+\textbf{b}^{(L)}$
+            \item Softmax: $p_k=\frac{e^{z_k}}{\sum^K_{j=1}e^{z_j}}$, $\sum_kp_k=1$, $\arg\max_kz_k$
+            \item Logits are unrestricted scores; softmax converts them into class probabilities.
+            \item \keyword{Cross-entropy}{Continuous loss penalising low probability assigned to the correct class $L_{CE}=-\log p_y$}
+            \item 0–1 classification loss gives no useful smooth learning signal; cross-entropy does.
+        \end{itemize}
+    \end{itemize}
+    \item \ilkeyword{Object detection}
+    \begin{itemize}
+        \item Task: detect the location of all object instances of all classes
+        \item Each object prediction: $(c_i, s_i, x_i, y_i, w_i, h_i)$
+        \item \(c_i\): Class; \(s_i\): confidence.\((x_i,y_i)\): Top-left box coordinates.\(w_i,h_i\): Width and height.
+        \item Classification: What is in the image?
+        \item Detection: What is where?
+        \item \ilkeyword{Window-based detection}
+        \begin{enumerate}
+            \item Train object/non-object classifier.
+            \item Generate candidate windows at multiple locations and scales.
+            \item Score each candidate independently.
+            \item Resolve detections using thresholding and NMS
+        \end{enumerate}
+        \begin{itemize}
+            \item Challenges: illumination, pose, occlusion, clutter, viewpoint and intra-class variation. Background class is highly diverse.
+            \item \keyword{Non-Maximum Suppression (NMS)}{Retain highest-scoring detection; suppress lower-scoring boxes with excessive overlap.}
+        \end{itemize}
+        \item \ilkeyword{Detection Evaluation}
+        \begin{itemize}
+            \item \keyword{Intersection over Union}{$IoU(A,B)=\frac{|A\cap B|}{|A\cup B|}$}
+            \item $Precision=\frac{TP}{TP+FP}$, $Recall=\frac{TP}{TP+FN}$
+            \item \keyword{Average Precision (AP)}{Area under precision-recall curve for one class at a fixed IoU threshold} $mAP=\frac{1}{C}\sum^C_{c=1}AP_c$
+            \item Some protocols also average across IoU thresholds 0.50–0.95.
+            \item Low precision → many FP; low recall → many FN.
+            \item TP: matched detection with IoU $\geq t$ (usually $t=0.5$); FP: unmatched/low-IoU detection; FN: missed GT object; TN not meaningful.
+        \end{itemize}
+    \end{itemize}
+    \item \ilkeyword{CNN-based object detection}
+    \begin{itemize}
+        \item \keyword{R-CNN}{Generate proposals; run CNN separately on each region; classify + regress boxes}
+        \item \keyword{Fast R-CNN}{Extract whole-image CNN features once; RoI pooling; external proposals}
+        \item  \keyword{Faster R-CNN}{Integrates learned Region Proposal Network (RPN)}
+        \item R-CNN is slow because approximately 2000 proposed regions each pass through the CNN.
+        \item Two-stage detection: Region proposals → classify and refine bounding boxes.
+        \item One-stage detection: Predict classes and bounding boxes directly and densely.
+        \item \keyword{YOLO}{You Only Look Once}
+        \begin{itemize}
+            \item One-stage detector. Partition image into grid cells with predefined anchor boxes in the version shown in the slides.
+            \item Predict per location/anchor:
+            \begin{itemize}
+                \item Objectness: \(P(\text{object})\)
+                \item Class score: \(P(\text{category}\mid\text{object})\)
+                \item Bounding-box coordinate adjustments.
+            \end{itemize}
+            \item Loss: $\mathcal{L}=\mathcal{L}_{\text{class}}+\lambda_{\text{box}}\mathcal{L}_{\text{box}}+\lambda_{\text{obj}}\mathcal{L}_{\text{objectness}}$
+        \end{itemize}
+        \item \ilkeyword{Modern YOLOs}
+        \begin{itemize}
+            \item Multi-scale feature fusion → handles different object sizes. Decoupled class and box prediction branches.
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+
+\section{06. Segments}
+\begin{itemize}
+    \item Goal: Separate image into coherent regions
+    \item Idea: \keyword{Clustering}{Group similar data points together}
+    \item Challenges: What makes 2 points same/different? Choice of features (e.g. Color, Intensity, Position), Which clustering algorithm?
+    \item \ilkeyword{Segmentation Types}
+    \begin{itemize}
+        \item Semantic: class per pixel; same-class objects share label
+        \item Instance: separates individual object instances
+        \item Panoptic: semantic + instance segmentation
+        \item Superpixel: compact similar-pixel region; not necessarily an object
+    \end{itemize}
+    \item \keyword{k-Means Clustering}{Iteratively re-assign points to nearest cluster center}
+    \item k-Means: 
+$y_i=\arg\min_j||p_i-c_j||^2$, \quad
+$c_j=\frac{\sum_{i:y_i=j}p_i}{\sum_{i:y_i=j}1}$
+    \begin{enumerate}
+        \item Randomly initialize the cluster centers $c_1, \ldots, c_K$
+        \item For each point $p_i$, find the closest $c_j$ to put $p_i$ in
+        \item Set $c_j$ to be mean of points in cluster $j$
+        \item Repeat, if $c_j$ have changed up to some threshold
+    \end{enumerate}
+    \begin{itemize}
+        \item Pros: Simple, Converges to local min.
+        \item Cons: Setting $K$, Sensitive to initial centers (Since k-means converges to local min.), Sensitive to outliers (Can add more clusters), Assumes spherical clusters
+    \end{itemize}
+    \item \ilkeyword{Simple Linear Iterative Clustering (SLIC) Superpixels}
+    \begin{itemize}
+        \item \keyword{Superpixel}{Group of pixels that share common traits}
+        \begin{itemize}
+            \item Application: Inputs to other CV algo. since more compact representation with perceptual meaning
+        \end{itemize}
+        \item Num. of pixels: $n_{tp}$; Target num. of superpixels: $n_{sp}$
+        \item Initial width of each superpixel: $s = \sqrt{n_{tp} / n_{sp}}$
+        \item Features: $z = [r,g,b,x,y]$
+        \item Color distance: $d_c = || \langle r_j,g_j,b_j \rangle - \langle r_i,g_i,b_i \rangle ||$
+        \item Spatial distance: $d_s = || \langle x_j,y_j \rangle - \langle x_i,y_i \rangle ||$
+        \item Scaling factors: $d_{cm}$ and $d_{sm}=s$ set as max. expected values of $d_c$ and $d_s$ respectively
+        \item $D = \sqrt{(\frac{d_c}{d_{cm}})^2+(\frac{d_s}{d_{sm}})^2} = \sqrt{d_c^2 + (\frac{d_s}{s})^2 c^2}$
+    \end{itemize}
+    \begin{enumerate}
+        \item Split img. into grid of size $s \times s$. Set cluster centers as lowest gradient position in $3 \times 3$ neighborhood from superpixel center to speed up convergence since initialize on value common to surrounding.
+        \item For each cluster center, check distance to all pixels within $2s \times 2s$ neighborhood. Assign pixels to closest checked center.
+        \item Update cluster centers using mean and repeat if not converged (Same as k-Means)
+        \item Optional: Replace superpixel region by average value to create stained glass effect
+    \end{enumerate}
+    \begin{itemize}
+        \item Modification of k-Means: Not random initialization, Compute pixel's distance only to closest set of cluster centers
+    \end{itemize}
+            \item \ilkeyword{Neural Network Segmentation}
+        \begin{itemize}
+            \item \keyword{Dense classification}{Classify every pixel: 
+            $H\times W\times3 \rightarrow H\times W\times K \rightarrow H\times W$}
+            
+            \item \keyword{Encoder}{Extract semantic features + downsample}
+            \quad
+            \keyword{Decoder}{Upsample to recover spatial resolution}
+            
+            \item Upsampling: nearest-neighbour (blocky), bilinear (smooth), 
+            transposed conv. (learned; insert zeros then convolve)
+            
+            \item \ilkeyword{FCN}
+            \begin{itemize}
+                \item FCN-32: no skips; FCN-16: +pool4; FCN-8: +pool3
+                \item Skip connections combine semantic + high-resolution features
+            \end{itemize}
+            
+            \item \keyword{U-Net}{Encoder-decoder with skip concatenations; preserves boundaries}
+            \begin{itemize}
+                \item Final conv: $K$ channels; softmax across channels; CE per pixel
+            \end{itemize}
+            
+            \item \ilkeyword{Evaluation}
+            \begin{itemize}
+                \item Pixel accuracy poor for small foreground
+                \item $IoU(A,B)=\frac{|A\cap B|}{|A\cup B|}$,
+                \quad
+                $Dice(A,B)=\frac{2|A\cap B|}{|A|+|B|}$
+                \item CE: pixel labels; overlap loss: region overlap
+                \item Dice and IoU rank predictions identically; Dice gives larger numerical scores.
+            \end{itemize}
+            
+            \item \keyword{Mask R-CNN}{Detection + mask head $\rightarrow$ class, box, mask per instance}
+        \end{itemize}
+
+    \item \ilkeyword{Promptable Segmentation}
+    \begin{itemize}
+        \item \keyword{Prompt}{Specifies target at inference without retraining; 
+        points, box, mask}
+        
+        \item \keyword{SAM}{
+        Image encoder + prompt encoder $\rightarrow$ mask decoder $\rightarrow$ mask}
+        \begin{itemize}
+            \item Positive/negative points include/exclude regions; prompts may be ambiguous
+        \end{itemize}
+        
+        \item \keyword{SAM 2}{Video segmentation + memory}
+        \quad
+        \keyword{SAM 3}{Concept/text or exemplar prompts}
+    \end{itemize}
+    
+\end{itemize}
+
+
+\end{multicols*}
+\end{document}
